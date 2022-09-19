@@ -23,7 +23,7 @@ folder.
 Some pre-computed ready-to-use near-zone and far-zone truncation coefficients
 from the [Bucha et al. (2019b)](https://doi.org/10.1007/s00190-019-01277-3)
 study are available at
-[https://doi.org/10.1007/s00190-019-01277-3](https://doi.org/10.1007/s00190-019-01277-3).
+[https://doi.org/10.5281/zenodo.7092048](https://doi.org/10.5281/zenodo.7092048).
 
 
 # Contact
