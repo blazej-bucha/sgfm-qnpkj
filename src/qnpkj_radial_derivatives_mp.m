@@ -97,7 +97,7 @@ function Q=qnpkj_radial_derivatives_mp(nmax,R,r,pmax,cos_psi,kmax,zone,digits)
 %
 %           The obtained values can be compared with the attached sample
 %           outputs from the file
-%           "sample-outputs/Truncation_coefficients_Q_near.mat".
+%           "../data/sample-outputs/Truncation_coefficients_Q_near.mat".
 %
 %           Importantly, note that the number of significant digits needs to be
 %           set also outside the "qnpkj_radial_derivatives_mp" function.  This

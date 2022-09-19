@@ -14,6 +14,9 @@ depending on the variables `nmax`, `pmax` and `kmax` (see [Bucha et
 al. (2019a)](https://doi.org/10.1007/s00190-018-1139-x) and [Bucha et
 al. (2019b)](https://doi.org/10.1007/s00190-019-01277-3)).
 
+For a test run, see the documentation in the source code files inside the `src`
+folder.
+
 
 ## Pre-computed truncation coefficients
 

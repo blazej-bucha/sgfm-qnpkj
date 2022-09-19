@@ -131,10 +131,10 @@
 %          mp.Digits(ndigits); %Sets the number of significant digits to "ndigits"
 %          psi=mp('100000')/mp('6378137'); %Radius of the integration zone
 %          Q=qnpkj_radial_derivatives_mp(10,mp('6378137'),mp('6378137')+mp('7000'),3,cos(psi),7,0,ndigits);
-%          mkdir('test-outputs') %Creates output directory
-%          save test-outputs/Truncation_coefficients_Q_near.mat -mat -v7.3 Q %saves the output Q coefficients
+%          mkdir('../data/test-outputs') %Creates output directory
+%          save ../data/test-outputs/Truncation_coefficients_Q_near.mat -mat -v7.3 Q %saves the output Q coefficients
 %          Q=qnpkj_radial_derivatives_mp(10,mp('6378137'),mp('6378137')+mp('7000'),3,cos(psi),7,1,ndigits);
-%          save test-outputs/Truncation_coefficients_Q_far.mat -mat -v7.3 Q %saves the output Q coefficients
+%          save ../data/test-outputs/Truncation_coefficients_Q_far.mat -mat -v7.3 Q %saves the output Q coefficients
 %
 %          Note that to compute, for instance, the kth radial derivative of
 %          "Q20" (in our test computation the 5th derivative), the coefficients 
@@ -156,7 +156,7 @@
 %          do not forget to set the correct path to the ADVANPIX toolbox.
 %
 %          The obtained values can be compared with the attached sample outputs
-%          from the folder "Truncation_coefficients_Sample_outputs".
+%          from the folder "../data/sample-outputs".
 %
 % REFERENCES: Bucha, B., Hirt, C., Kuhn, M. (2019a) Cap integration in spectral
 %               gravity forward modelling: near- and far-zone gravity effects
@@ -233,19 +233,19 @@ kmax=5; %Maximum order of the radial derivative of the truncation coefficients
 %the "qnpkj_radial_derivatives_mp" function. If you wish to compute
 %horizontal derivatives only for the far-zone coefficients, leave this
 %variable empty ("near_zone_trunc_coeffs_path='';")
-near_zone_trunc_coeffs_path='test-outputs/Truncation_coefficients_Q_near.mat';
+near_zone_trunc_coeffs_path='../data/test-outputs/Truncation_coefficients_Q_near.mat';
 
 %Absolute or relative path to the far-zone truncation coefficients from
 %the "qnpkj_radial_derivatives_mp" function. If you wish to compute
 %horizontal derivatives only for the near-zone coefficients, leave this
 %variable empty ("far_zone_trunc_coeffs_path='';")
-far_zone_trunc_coeffs_path='test-outputs/Truncation_coefficients_Q_far.mat';
+far_zone_trunc_coeffs_path='../data/test-outputs/Truncation_coefficients_Q_far.mat';
 %==========================================================================
 
 
 %Outputs
 %==========================================================================
-save_name_path='test-outputs/Truncation_coefficients';
+save_name_path='../data/test-outputs/Truncation_coefficients';
 %==========================================================================
 
 
