@@ -38,7 +38,7 @@
 %
 %        "pmax"    -- Maximum number of the topography power (pmax>=1)
 %
-%        "psi"     -- Spherical distance separating the near- and far-zone 
+%        "psi"     -- Spherical distance separating the near- and far-zone
 %                     masses (inside and outside the spherical cap, respectively)
 %
 %        "kmax"    -- Maximum order of the radial derivative of the
@@ -91,8 +91,8 @@
 %                     topography integer powers from 1 up to the user-defined
 %                     "pmax" value.
 %
-%                     For instance, using "Q21" as an examples together with
-%                     "nmax=2", "kmax=4" and "pmax=3" yields a 3D matrix with 
+%                     For instance, using "Q21" together with
+%                     "nmax=2", "kmax=4" and "pmax=3" yields a 3D matrix with
 %                     the structure
 %
 %                     Q21(:,:,1) = [(0,0) (0,1) (0,2) (0,3) (0,4)]
@@ -137,9 +137,9 @@
 %          save ../data/test-outputs/Truncation_coefficients_Q_far.mat -mat -v7.3 Q %saves the output Q coefficients
 %
 %          Note that to compute, for instance, the kth radial derivative of
-%          "Q20" (in our test computation the 5th derivative), the coefficients 
-%          from the "qnpkj_radial_derivatives_mp" function have to be computed 
-%          up to the derivative "k+2" (here 7). 
+%          "Q20" (in our test computation the 5th derivative), the coefficients
+%          from the "qnpkj_radial_derivatives_mp" function have to be computed
+%          up to the derivative "k+2" (here 7).
 %
 %          Then, run this script while using the following input
 %          parameters:
@@ -197,7 +197,7 @@ mp.Digits(digits); %The number of significant digits have to be set prior to any
 addpath(ADVANPIX_toolbox_path);
 %..........................................................................
 
-nmax=10; %Maximum harmonic degree of truncation coefficients 
+nmax=10; %Maximum harmonic degree of truncation coefficients
          %(must be equal to or smaller than that of the loaded
          %coefficients).
          %This value is an integer, so can be defined in the usual way,
@@ -214,12 +214,12 @@ r=R+mp('7000'); %Spherical radius of the evaluation point
                 %defined in the extended precision.
 
 pmax=3; %Maximum number of the topography power of the
-        %output truncation coefficients (must be equal to or smaller 
+        %output truncation coefficients (must be equal to or smaller
         %than that of the loaded coefficients).
         %This value is an integer, so can be defined in the usual way,
         %that is, without the "mp" command.
 
-psi=mp('100000')/mp('6378137'); %Spherical distance separating the near- and far-zone 
+psi=mp('100000')/mp('6378137'); %Spherical distance separating the near- and far-zone
                                 %masses (must be equal to that of the loaded coefficients)
                                 %This value is generally not an integer, so have to be
                                 %defined in the extended precision.
@@ -291,10 +291,10 @@ LF_order_max=2; %Maximum order of Legendre functions that will be evaluated
 %--------------------------------------------------------------------------
 cospsi=cos(psi);
 sinpsi=sin(psi);
-sqrt_1_m_cospsi2=sqrt(1-cospsi^2);
+sqrt_1_m_cospsi2=sqrt(mp('1')-cospsi^mp('2'));
 Pnm=zeros(nmax+1,LF_order_max+1,'mp');
 
-P0=1;
+P0=mp('1');
 P1=cospsi;
 Pnm(1,1)=P0;
 Pnm(2,1)=P1;
@@ -305,7 +305,7 @@ Pnm(2,2)=sinpsi;
 %Zonal Legendre functions
 %--------------------------------------------------------------------------
 for n=2:nmax
-    P2=(2*n-1)/n*cospsi*P1-(n-1)/n*P0;
+    P2=(mp('2')*mp(n)-mp('1'))/mp(n)*cospsi*P1-(mp(n)-mp('1'))/mp(n)*P0;
     Pnm(n+1,1)=P2;
     P0=P1;
     P1=P2;
@@ -317,7 +317,7 @@ end
 %--------------------------------------------------------------------------
 for n=1:nmax
     for m=1:LF_order_max
-        Pnm(n+1,m+1)=(Pnm(n,m+1)+(n-m+1)*sqrt_1_m_cospsi2*Pnm(n+1,m))/cospsi;
+        Pnm(n+1,m+1)=(Pnm(n,m+1)+(mp(n)-mp(m)+mp('1'))*sqrt_1_m_cospsi2*Pnm(n+1,m))/cospsi;
     end
 end
 %--------------------------------------------------------------------------
@@ -332,7 +332,7 @@ max_der=pmax+kmax+2;
 %Factorials and double factorials
 %--------------------------------------------------------------------------
 fprintf('Computing factorials and double factorial... (%s) \n',datestr(clock));
-fact=factorial(0:(max_der+1));
+fact=factorial(mp(0:(max_der+1)));
 double_fact=zeros(1,2*max_der,'mp');
 for i=0:(2*max_der)
     double_fact(i+1)=prod(mp(i:-2:1));
@@ -344,12 +344,12 @@ end
 %--------------------------------------------------------------------------
 fprintf('Computing Euclidean distance and its derivatives... (%s) \n',datestr(clock));
 l=zeros(1,max_der+1,'mp');
-dist=sqrt(r^2-2*R*r*cospsi+R^2);
-l(1)=1./dist;
+dist=sqrt(r^mp('2')-mp('2')*R*r*cospsi+R^mp('2'));
+l(1)=mp('1')./dist;
 for k=1:max_der
     for t=0:k
         if rem((k+t),2)==0
-            l(k+1)=l(k+1)+(-1)^((k+t)/2)*double_fact(k-t+2)*double_fact(k+t)/fact(k-t+2)*fact(k+1)/fact(t+1)*((r-R*cospsi)^t)/dist^(k+t+1);
+            l(k+1)=l(k+1)+mp('-1')^(mp(k+t)/mp('2'))*double_fact(k-t+2)*double_fact(k+t)/fact(k-t+2)*fact(k+1)/fact(t+1)*((r-R*cospsi)^mp(t))/dist^mp(k+t+1);
         end
     end
 end
@@ -363,11 +363,11 @@ Rwq=zeros(pmax,kmax+2,'mp');
 for w=1:pmax
     for q=0:(kmax+1)
         if q==0
-            rwq=r^w;
+            rwq=r^mp(w);
         else
             rwq=r.^(w-q);
             for j=1:q
-                rwq=(w-j+1)*rwq;
+                rwq=mp(w-j+1)*rwq;
             end
         end
         Rwq(w,q+1)=rwq;
@@ -382,7 +382,7 @@ fprintf('Computing the aps coefficients... (%s) \n',datestr(clock));
 aps=zeros(pmax,pmax-2,'mp');
 for p=1:pmax
     for s=1:p-2
-        aps(p,s)=(-1)^(p-1)*fact(p)*fact(p-2)/fact(p-s+1)*fact(p-s-1)*fact(s);
+        aps(p,s)=mp('-1')^mp(p-1)*(fact(p)*fact(p-2))/(fact(p-s+1)*fact(p-s-1)*fact(s));
     end
 end
 %--------------------------------------------------------------------------
@@ -393,10 +393,10 @@ end
 %--------------------------------------------------------------------------
 fprintf('Computing binomial coefficients... (%s) \n',datestr(clock));
 binomial=zeros(max_der+1,max_der+1,'mp');
-binomial(:,1)=1;
+binomial(:,1)=mp('1');
 for i=0:max_der
     for ii=1:i
-        binomial(i+1,ii+1)=binomial(i+1,ii)*(i-ii+1)/(ii);
+        binomial(i+1,ii+1)=binomial(i+1,ii)*mp(i-ii+1)/mp(ii);
     end
 end
 %--------------------------------------------------------------------------
@@ -409,16 +409,16 @@ K=zeros(pmax,kmax+2,'mp');
 K1=R.*l;
 K(1,1:(kmax+2))=K1(1,1:(kmax+2)); %Integral kernel for p=1
 for k=0:(kmax+1) %Integral kernel for p=2
-    K(2,k+1)=1/2*(-(k-1)*K1(1,k+1)-r*K1(1,k+2));
+    K(2,k+1)=mp('1')/mp('2')*(mp(-(k-1))*K1(1,k+1)-r*K1(1,k+2));
 end
 for k=0:(kmax+1)
     q=0:k;
     for p=3:pmax %Integral kernels for p>=3
-        temp=0;
+        temp=mp('0');
         for s=1:(p-2)
             temp=temp+aps(p,s)*sum(binomial(k+1,q+1).*Rwq(p-s,k-q+1).*K1(p-s+q+1));
         end
-        K(p,k+1)=1/fact(p+1)*temp;
+        K(p,k+1)=mp('1')/fact(p+1)*temp;
     end
 end
 %--------------------------------------------------------------------------
@@ -458,15 +458,15 @@ if far_zone==1
 end
 n=0:nmax;
 n=n(:);
-sinpsi_Pn1_nnp1=sinpsi.*Pnm(:,2)./(n.*(n+1));
+sinpsi_Pn1_nnp1=sinpsi.*Pnm(:,2)./mp(n.*(n+1));
 
 %(Eq. 66 of Bucha et al., 2019b)
 for p=1:pmax
     for k=0:kmax
-        temp_near=0;
-        temp_far=0;
+        temp_near=mp('0');
+        temp_far=mp('0');
         for q=0:k
-            temp=binomial(k+1,q+1)*(-1)^(k-q)*fact(k-q+1)./r^(k-q+1);
+            temp=binomial(k+1,q+1)*mp(-1)^mp(k-q)*fact(k-q+1)./r^mp(k-q+1);
             temp2=sinpsi_Pn1_nnp1.*K(p,q+1);
             if near_zone==1
                 temp_near=temp_near+temp.*(c_near*temp2-Qn_near(1:(nmax+1),q+1,p));
@@ -530,7 +530,7 @@ for p=1:pmax
         temp_near=0;
         temp_far=0;
         for q=0:k
-            temp=binomial(k+1,q+1)*(-1)^(k-q)*fact(k-q+1)./r^(k-q+1);
+            temp=binomial(k+1,q+1)*mp(-1)^mp(k-q)*fact(k-q+1)./r^mp(k-q+1);
             temp2=sinpsi_Pn1_nnp1.*K(p,q+2);
             if near_zone==1
                 temp_near=temp_near+temp.*(Q11_near(1:(nmax+1),q+1,p)-c_near*temp2+Qn_near(1:(nmax+1),q+2,p));
@@ -567,11 +567,11 @@ fprintf('Computing truncation coefficients Q22... (%s) \n',datestr(clock));
 %"psi" (only once) (Eq. 101 of Bucha et al., 2019b)
 %..........................................................................
 lpsi=zeros(1,max_der+1,'mp');
-lpsi(1)=-(R*r*sinpsi)/dist^3;
+lpsi(1)=-(R*r*sinpsi)/dist^mp('3');
 for k=1:max_der
     for t=0:k
         if rem((k+t),2)==0
-            lpsi(k+1)=lpsi(k+1)+(-1)^((k+t)/2)*double_fact(k-t+2)*double_fact(k+t)/fact(k-t+2)*fact(k+1)/fact(t+1)*(((r-R*cospsi)^(t-1)*R*sinpsi)/dist^(k+t+1)*(t-(r-R*cospsi)*r*(k+t+1)/(dist^2)));
+            lpsi(k+1)=lpsi(k+1)+mp(-1)^(mp(k+t)/mp('2'))*double_fact(k-t+2)*double_fact(k+t)/fact(k-t+2)*fact(k+1)/fact(t+1)*(((r-R*cospsi)^mp(t-1)*R*sinpsi)/dist^mp(k+t+1)*(mp(t)-(r-R*cospsi)*r*mp(k+t+1)/(dist^mp('2'))));
         end
     end
 end
@@ -585,16 +585,16 @@ Kpsi=zeros(pmax,kmax+2,'mp');
 Kpsi1=R*lpsi;
 Kpsi(1,1:(kmax+2))=Kpsi1(1,1:(kmax+2)); %p=1
 for k=0:(kmax+1) %p=2
-    Kpsi(2,k+1)=1/2*(-(k-1)*Kpsi1(1,k+1)-r*Kpsi1(1,k+2));
+    Kpsi(2,k+1)=mp('1')/mp('2')*(mp(-(k-1))*Kpsi1(1,k+1)-r*Kpsi1(1,k+2));
 end
 for k=0:(kmax+1)
     q=0:k;
     for p=3:pmax %p>=3
-        temp=0;
+        temp=mp('0');
         for s=1:(p-2)
             temp=temp+aps(p,s)*sum(binomial(k+1,q+1).*Rwq(p-s,k-q+1).*Kpsi1(p-s+q+1));
         end
-        Kpsi(p,k+1)=1/fact(p+1)*temp;
+        Kpsi(p,k+1)=mp('1')/fact(p+1)*temp;
     end
 end
 %..........................................................................
@@ -606,7 +606,7 @@ end
 if far_zone==1
     Q22_far=zeros(nmax+1,kmax+1,pmax,'mp');
 end
-sinpsi_Pn2_np2p1nm1=sinpsi.*Pnm(:,3)./((n+2).*(n+1).*n.*(n-1));
+sinpsi_Pn2_np2p1nm1=sinpsi.*Pnm(:,3)./mp((n+2).*(n+1).*n.*(n-1));
 
 %(Eq. 99 of Bucha et al., 2019b)
 for p=1:pmax
@@ -614,7 +614,7 @@ for p=1:pmax
         temp_near=0;
         temp_far=0;
         for q=0:k
-            temp=binomial(k+1,q+1)*(-1)^(k-q)*fact(k-q+2)./r^(k-q+2);
+            temp=binomial(k+1,q+1)*mp(-1)^mp(k-q)*fact(k-q+2)./r^mp(k-q+2);
             temp2=sinpsi_Pn2_np2p1nm1.*Kpsi(p,q+1);
             temp3=sinpsi_Pn1_nnp1.*K(p,q+1);
             if near_zone==1
@@ -624,8 +624,8 @@ for p=1:pmax
                 temp_far=temp_far+temp.*(c_far*temp2-c_far*temp3+Qn_far(1:(nmax+1),q+1,p));
             end
         end
-        Q22_near(1:(nmax+1),k+1,p)=1/2*temp_near;
-        Q22_far(1:(nmax+1),k+1,p)=1/2*temp_far;
+        Q22_near(1:(nmax+1),k+1,p)=mp('1')/mp('2')*temp_near;
+        Q22_far(1:(nmax+1),k+1,p)=mp('1')/mp('2')*temp_far;
     end
 end
 clear temp temp2 temp3 temp_near temp_far

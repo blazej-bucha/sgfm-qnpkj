@@ -13,5 +13,4 @@ The files
     "Truncation_coefficients_Q22_near.mat",
     "Truncation_coefficients_Q22_far.mat", and
 
-were created by running the test examples in
-"qnpkj_radial_derivatives_mp" and "qnpkj_horizontal_derivatives_mp".
+were created by running the test example in "qnpkj_horizontal_derivatives_mp".

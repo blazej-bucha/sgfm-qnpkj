@@ -141,15 +141,15 @@ mp1d3=mp('1/3');
 %Substitutions and initializations
 %--------------------------------------------------------------------------
 t=R/r; %Substitution
-t2=t^2; %Substitution
-max_der=pmax+kmax+1; %Order of the maximum derivative that needs to be 
+t2=t^mp('2'); %Substitution
+max_der=pmax+kmax+1; %Order of the maximum derivative that needs to be
                        %computed in some parts of the code
 
 if zone==0 %Near zone
     ul=cos_psi; %Lower boundary of the integration over "psi"
-    uu=1; %Upper boundary of the integration over "psi"
+    uu=mp('1'); %Upper boundary of the integration over "psi"
 elseif zone==1 %Far zone
-    ul=-1; %Lower boundary of the integration over "psi"
+    ul=mp('-1'); %Lower boundary of the integration over "psi"
     uu=cos_psi; %Upper boundary of the integration over "psi"
 end
 gu_der=zeros(1,max_der+1,'mp'); %Initialization of a matrix with derivatives
@@ -173,12 +173,12 @@ end
 %--------------------------------------------------------------------------
 fprintf('Computing gu-terms (%s)\n',datestr(clock))
 
-gu=sqrt(1-2*t*uu+t2); %Normalized distance "g(t,uu)"
-gu_der(1)=1/gu; %Zero-order derivative of "1/g(t,uu)" with respect to "t"
+gu=sqrt(mp('1')-mp('2')*t*uu+t2); %Normalized distance "g(t,uu)"
+gu_der(1)=mp('1')/gu; %Zero-order derivative of "1/g(t,uu)" with respect to "t"
 for i=1:max_der %First- and higher-order derivative of "1/g(t,uu)" with respect to "t"
     for l=0:i
         if rem((i+l),2)==0
-            gu_der(i+1)=gu_der(i+1)+(-1)^((i+l)/2)*double_fact(i-l+2)*double_fact(i+l)/fact(i-l+2)*fact(i+1)/fact(l+1)*((t-uu)^l)/gu^(i+l+1);
+            gu_der(i+1)=gu_der(i+1)+mp('-1')^(mp(i+l)/mp('2'))*double_fact(i-l+2)*double_fact(i+l)/fact(i-l+2)*fact(i+1)/fact(l+1)*((t-uu)^mp(l))/gu^mp(i+l+1);
         end
     end
 end
@@ -189,12 +189,12 @@ end
 %--------------------------------------------------------------------------
 fprintf('Computing gl-terms (%s)\n',datestr(clock))
 
-gl=sqrt(1-2*t*ul+t2); %Normalized distance "g(t,ul)"
-gl_der(1)=1/gl; %Zero-order derivative of "1/g(t,ul)" with respect to "t"
+gl=sqrt(mp('1')-mp('2')*t*ul+t2); %Normalized distance "g(t,ul)"
+gl_der(1)=mp('1')/gl; %Zero-order derivative of "1/g(t,ul)" with respect to "t"
 for i=1:max_der %First- and higher-order derivative of "1/g(t,ul)" with respect to "t"
     for l=0:i
         if rem((i+l),2)==0
-            gl_der(i+1)=gl_der(i+1)+(-1)^((i+l)/2)*double_fact(i-l+2)*double_fact(i+l)/fact(i-l+2)*fact(i+1)/fact(l+1)*((t-ul)^l)/gl^(i+l+1);
+            gl_der(i+1)=gl_der(i+1)+mp('-1')^(mp(i+l)/mp('2'))*double_fact(i-l+2)*double_fact(i+l)/fact(i-l+2)*fact(i+1)/fact(l+1)*((t-ul)^mp(l))/gl^mp(i+l+1);
         end
     end
 end
@@ -217,17 +217,17 @@ fprintf('Computing M-terms (%s)\n',datestr(clock))
 %Initializations
 M=zeros(1,nmax+1,'mp');
 if zone==0 %Near zone
-    M(1)=1-ul;
-    M(2)=0.5*(1-ul^2);
+    M(1)=mp('1')-ul;
+    M(2)=mp('0.5')*(mp('1')-ul^mp('2'));
 elseif zone==1 %Far zone
-    M(1)=1+uu;
-    M(2)=0.5*(uu^2-1);
+    M(1)=mp('1')+uu;
+    M(2)=mp('0.5')*(uu^mp('2')-mp('1'));
 end
 
-nn=0:mpnmax;
-nn1=1./(nn+1); %Substitution
-nn2=2.*nn-1; %Substitution
-nnm2=nn-2; %Substitution
+nn=mp(0:mpnmax);
+nn1=mp('1')./(nn+mp('1')); %Substitution
+nn2=mp('2').*nn-mp('1'); %Substitution
+nnm2=nn-mp('2'); %Substitution
 for n=2:nmax %Loop over harmonic degrees
     M(n+1)=nn1(n+1)*(nn2(n+1)*u0*M(n)-nnm2(n+1)*M(n-1));
 end
@@ -242,10 +242,10 @@ fprintf('Computing binomial coefficients (%s)\n',datestr(clock))
 %Binomial coefficients are here computed via recurrence relations using the
 %extended number of significant digits
 binomial=zeros(max_der+1,max_der+1,'mp');
-binomial(:,1)=1;
+binomial(:,1)=mp('1');
 for i=0:max_der
     for ii=1:i
-        binomial(i+1,ii+1)=binomial(i+1,ii)*(i-ii+1)/ii;
+        binomial(i+1,ii+1)=binomial(i+1,ii)*mp(i-ii+1)/mp(ii);
     end
 end
 %--------------------------------------------------------------------------
@@ -257,20 +257,20 @@ fprintf('Computing B-terms (%s)\n',datestr(clock))
 
 %Initializations
 B=zeros(nmax+1,max_der+1,'mp');
-t_temp=(1+t2)/t; %Substitution
+t_temp=(mp('1')+t2)/t; %Substitution
 beta0uu=zeros(1,max_der+1,'mp');
 beta1uu=beta0uu;
 beta1ul=beta0uu;
 for i=0:max_der
-    tmi1=t^(-(i+1));
-    tmi2=t^(-(i+2));
-    m1i=(-1)^i;
-    m1i1=(-1)^(i+1);
-    tp2=1/t^2;
+    tmi1=t^mp(-(i+1));
+    tmi2=t^mp(-(i+2));
+    m1i=mp('-1')^mp(i);
+    m1i1=mp('-1')^mp(i+1);
+    tp2=mp('1')/t^mp('2');
     beta0uu(i+1)=m1i*fact(i+1)*tmi1;
     if i==0
-        beta1uu(i+1)=tp2-uu/t+1;
-        beta1ul(i+1)=tp2-ul/t+1;
+        beta1uu(i+1)=tp2-uu/t+mp('1');
+        beta1ul(i+1)=tp2-ul/t+mp('1');
     else
         fact_i1=fact(i+1);
         fact_i2=fact(i+2);
@@ -280,17 +280,17 @@ for i=0:max_der
 end
 beta0ul=beta0uu;
 
-iii=0:max_der; %Substitution
+iii=mp(0:max_der); %Substitution
 it=iii./t; %Substitution
-iim1t=iii.*(iii-1)./t; %Substitution
-iii2=2*iii; %Substitution
+iim1t=iii.*(iii-mp('1'))./t; %Substitution
+iii2=mp('2')*iii; %Substitution
 g0_dert=g0_der./t; %Substitution
 for i=0:max_der %Loop over derivatives
     %Initial values
     if i==0
-        B(1,i+1)=1/(t*gu)-1/(t*gl);
+        B(1,i+1)=mp('1')/(t*gu)-mp('1')/(t*gl);
         if nmax>0
-            B(2,i+1)=1/(t2*gu)*(1-t*uu+t2)-1/(t2*gl)*(1-t*ul+t2);
+            B(2,i+1)=mp('1')/(t2*gu)*(mp('1')-t*uu+t2)-mp('1')/(t2*gl)*(mp('1')-t*ul+t2);
         end
     else
         for k=0:i
@@ -331,29 +331,29 @@ alfa0ul=alfa0uu;
 alfa1uu=alfa0uu;
 alfa1ul=alfa0uu;
 for i=0:max_der
-    m1i=(-1)^i;
-    m1i1=(-1)^(i+1);
+    m1i=mp('-1')^mp(i);
+    m1i1=mp('-1')^mp(i+1);
     fact_i1=fact(i+1);
     fact_i2=fact(i+2);
-    ti1=t^(i+1);
-    ti2=t^(i+2);
+    ti1=t^mp(i+1);
+    ti2=t^mp(i+2);
     m1i_fact_i1_ti1=m1i*fact_i1/ti1;
     m1i_fact_i2_ti2=m1i*fact_i2/ti2;
     if i==0
-        alfa0uu(i+1)=(1/t-2*uu+t);
-        alfa0ul(i+1)=(1/t-2*ul+t);
-        alfa1uu(i+1)=t2-t*uu-uu/t+1/t2-2*uu^2+2;
-        alfa1ul(i+1)=t2-t*ul-ul/t+1/t2-2*ul^2+2;
+        alfa0uu(i+1)=(mp('1')/t-mp('2')*uu+t);
+        alfa0ul(i+1)=(mp('1')/t-mp('2')*ul+t);
+        alfa1uu(i+1)=t2-t*uu-uu/t+mp('1')/t2-mp('2')*uu^mp('2')+mp('2');
+        alfa1ul(i+1)=t2-t*ul-ul/t+mp('1')/t2-mp('2')*ul^mp('2')+mp('2');
     elseif i==1
-        alfa0uu(i+1)=m1i_fact_i1_ti1+1;
-        alfa0ul(i+1)=m1i_fact_i1_ti1+1;
-        alfa1uu(i+1)=m1i1*fact_i1*uu/ti1+m1i_fact_i2_ti2+2*t-uu;
-        alfa1ul(i+1)=m1i1*fact_i1*ul/ti1+m1i_fact_i2_ti2+2*t-ul;
+        alfa0uu(i+1)=m1i_fact_i1_ti1+mp('1');
+        alfa0ul(i+1)=m1i_fact_i1_ti1+mp('1');
+        alfa1uu(i+1)=m1i1*fact_i1*uu/ti1+m1i_fact_i2_ti2+mp('2')*t-uu;
+        alfa1ul(i+1)=m1i1*fact_i1*ul/ti1+m1i_fact_i2_ti2+mp('2')*t-ul;
     elseif i==2
         alfa0uu(i+1)=m1i_fact_i1_ti1;
         alfa0ul(i+1)=m1i_fact_i1_ti1;
-        alfa1uu(i+1)=m1i1*fact_i1*uu/ti1+m1i_fact_i2_ti2+2;
-        alfa1ul(i+1)=m1i1*fact_i1*ul/ti1+m1i_fact_i2_ti2+2;
+        alfa1uu(i+1)=m1i1*fact_i1*uu/ti1+m1i_fact_i2_ti2+mp('2');
+        alfa1ul(i+1)=m1i1*fact_i1*ul/ti1+m1i_fact_i2_ti2+mp('2');
     else
         alfa0uu(i+1)=m1i_fact_i1_ti1;
         alfa0ul(i+1)=m1i_fact_i1_ti1;
@@ -362,19 +362,19 @@ for i=0:max_der
     end
 end
 
-nn=0:mpnmax; %Substitution
-nn21=1./(2*nn(3:end)'+1); %Substitution
-nn2=2*(nn(3:end)'+1); %Substitution
-t2p1=1+t2; %Substitution
-tt2=2*t; %Substitution
-ii_1=iii.*(iii-1); %Substitution
+nn=mp(0:mpnmax); %Substitution
+nn21=mp('1')./(mp('2')*nn(3:end)'+mp('1')); %Substitution
+nn2=mp('2')*(nn(3:end)'+mp('1')); %Substitution
+t2p1=mp('1')+t2; %Substitution
+tt2=mp('2')*t; %Substitution
+ii_1=iii.*(iii-mp('1')); %Substitution
 M=M(3:end)'; %Substitution
 nn2M=nn2.*M; %Substitution
 for i=0:max_der
     if i==0
         A(1,i+1)=-gu/t+gl/t;
         if nmax>0
-            A(2,i+1)=-gu/(3*t2)*(1+t*uu+t2)+gl/(3*t2)*(1+t*ul+t2);
+            A(2,i+1)=-gu/(mp('3')*t2)*(mp('1')+t*uu+t2)+gl/(mp('3')*t2)*(mp('1')+t*ul+t2);
         end
     else
         for k=0:i
@@ -412,16 +412,16 @@ clear B Bn_i Bn_ip1 Bnp1_im1 Bnp1_ip1 M Mn_g0_dert_i nn nn21 nn2 t2p1 tt2 iii2 i
 %--------------------------------------------------------------------------
 
 
-%L-terms (Eq. 46 of Bucha et al., 2019)
+%J-terms (Eq. 54 of Bucha et al., 2019)
 %--------------------------------------------------------------------------
-fprintf('Computing L-terms (%s)\n',datestr(clock))
+fprintf('Computing J-terms (%s)\n',datestr(clock))
 
-L=zeros(nmax+1,max_der+1,'mp');
+J=zeros(nmax+1,max_der+1,'mp');
 for i=0:max_der
     if i==0
-        L(:,i+1)=t*A(:,i+1);
+        J(:,i+1)=t*A(:,i+1);
     else
-        L(:,i+1)=t*A(:,i+1)+i*A(:,i);
+        J(:,i+1)=t*A(:,i+1)+mp(i)*A(:,i);
     end
 end
 %--------------------------------------------------------------------------
@@ -433,10 +433,25 @@ fprintf('Computing T-terms (%s)\n',datestr(clock))
 
 T=zeros(max_der+1,1,'mp');
 for i=0:max_der
-    T(i+1)=(-1)^i*fact(i+1)*R/r^(i+1);
+    T(i+1)=mp('-1')^mp(i)*fact(i+1)*R/r^mp(i+1);
 end
 %--------------------------------------------------------------------------
 
+% Partial Bell polynomials (Eq. 51 of Bucha et al., 2019)
+%--------------------------------------------------------------------------
+fprintf('Computing partial Bell polynomials (%s)\n',datestr(clock))
+
+%Partial Bell polynomials
+Bell=zeros(max_der+1,max_der+1,'mp');
+Bell(1,1)=1;
+for n=1:max_der
+    for k=1:max_der
+        if n-k+1>0
+            Bell(n+1,k+1)=Bell(n+1,k+1)+(binomial(n,1:(n-k+1))*(T((1:(n-k+1))+1).*Bell(n-(1:(n-k+1))+1,k)));
+        end
+    end
+end
+%--------------------------------------------------------------------------
 
 %G-terms (Eq. 48 of Bucha et al., 2019)
 %--------------------------------------------------------------------------
@@ -447,21 +462,8 @@ for i=0:max_der
     if i==0
         G(:,i+1)=t*A(:,i+1);
     else
-        %Partial Bell polynomials
-        Bell=zeros(max_der+1,max_der+1,'mp');
-        Bell(1,1)=1;
-        Bell(2:end,1)=0;
-        Bell(1,2:end)=0;
-        for n=1:max_der
-            for k=1:max_der
-                if n-k+1>0
-                    Bell(n+1,k+1)=Bell(n+1,k+1)+(binomial(n,1:(n-k+1))*(T((1:(n-k+1))+1).*Bell(n-(1:(n-k+1))+1,k)));
-                end
-            end
-        end
-
         for pp=1:i
-            G(:,i+1)=G(:,i+1)+L(:,pp+1)*Bell(i+1,pp+1);
+            G(:,i+1)=G(:,i+1)+J(:,pp+1)*Bell(i+1,pp+1);
         end
     end
 end
@@ -475,7 +477,7 @@ fprintf('Computing Q-terms (%s)\n',datestr(clock))
 
 r_powers=zeros(1,max([pmax kmax])+1,'mp');
 for e=0:max([pmax kmax])
-    r_powers(e+1)=r^e;
+    r_powers(e+1)=r^mp(e);
 end
 Q=zeros(nmax+1,kmax+1,pmax,'mp');
 for p_temp=1:pmax
@@ -484,16 +486,16 @@ for p_temp=1:pmax
         if p_temp==1
             Q(:,oo+1,p_temp)=G(:,i+1);
         elseif p_temp==2
-            Q(:,oo+1,p_temp)=-(i-1)*G(:,i+1)-r*G(:,i+2);
+            Q(:,oo+1,p_temp)=mp(-(i-1))*G(:,i+1)-r*G(:,i+2);
         else
-            ap=(-1)^(p_temp-1)*fact(p_temp)*fact(p_temp-2);
+            ap=mp('-1')^mp(p_temp-1)*fact(p_temp)*fact(p_temp-2);
             Q_temp=0;
             for s=1:p_temp-2
                 aps=ap/fact(p_temp-s+1)/fact(p_temp-s-1)/fact(s);
                 if i==0
                     Q_temp=Q_temp+aps*r_powers(p_temp-s+1)*G(:,p_temp-s+1);
                 else
-                    der_temp=0;
+                    der_temp=mp('0');
                     for k=0:i
                         ii=i-k;
                         if ii==0
@@ -502,9 +504,9 @@ for p_temp=1:pmax
                             if (i-k)>(p_temp-s)
                                 continue
                             else
-                                r_ampl=1;
+                                r_ampl=mp('1');
                                 for j=1:ii
-                                    r_ampl=r_ampl*(p_temp-s-j+1);
+                                    r_ampl=r_ampl*mp(p_temp-s-j+1);
                                 end
                                 r_ampl=r_ampl*r_powers(p_temp-s-ii+1);
 
@@ -519,6 +521,6 @@ for p_temp=1:pmax
         end
         oo=oo+1;
     end
-    Q(:,:,p_temp)=1/fact(p_temp+1).*Q(:,:,p_temp);
+    Q(:,:,p_temp)=mp('1')/fact(p_temp+1).*Q(:,:,p_temp);
 end
 %--------------------------------------------------------------------------
